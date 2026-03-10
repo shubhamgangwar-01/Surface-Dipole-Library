@@ -1,0 +1,66 @@
+[build-system]
+requires      = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name            = "surface-dipole-library"
+version         = "1.0.0"
+description     = "Dipole moment and dipole–dipole interaction calculator for glass–thin-film interface research"
+readme          = "README.md"
+license         = {text = "MIT"}
+requires-python = ">=3.9"
+
+keywords = [
+    "dipole", "surface", "thin film", "glass", "interface",
+    "materials science", "DFT screening", "computational chemistry",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "numpy>=1.22",
+    "pandas>=1.4",
+]
+
+[project.optional-dependencies]
+ase       = ["ase>=3.22"]
+pymatgen  = ["pymatgen>=2023.1"]
+all       = ["ase>=3.22", "pymatgen>=2023.1"]
+dev       = [
+    "pytest>=7",
+    "pytest-cov",
+    "black",
+    "ruff",
+    "mypy",
+]
+
+[project.urls]
+Homepage   = "https://github.com/your-org/surface-dipole-library"
+Issues     = "https://github.com/your-org/surface-dipole-library/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["surface_dipole_library*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-v"

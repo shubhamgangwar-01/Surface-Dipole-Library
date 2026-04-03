@@ -47,6 +47,7 @@ from .io import (
     load_from_poscar,
     load_from_cif,
 )
+from .glass_substrate import get_glass_surface, get_glass_atoms, glass_surface_info
 
 
 # ---------------------------------------------------------------------------
@@ -280,3 +281,188 @@ def analyze_from_ase(
 
     return analyze_surface_interactions(sub_atoms, film_atoms,
                                         cutoff=cutoff, verbose=verbose)
+
+
+# ---------------------------------------------------------------------------
+# Glass-fixed API  —  substrate is always borosilicate glass
+# ---------------------------------------------------------------------------
+
+
+def analyze_film_on_glass(
+    film_atoms: AtomInput,
+    cutoff: Optional[float] = None,
+    glass_variant: str = "borosilicate",
+    verbose: bool = True,
+) -> Dict[str, Any]:
+    """
+    Run the full dipole–dipole interaction analysis with the substrate
+    **fixed as borosilicate glass**.  The user only supplies the thin film.
+
+    The glass surface is the canonical 12-atom borosilicate (SiO₂-rich)
+    termination defined in :mod:`surface_dipole_library.glass_substrate`,
+    using ClayFF partial charges (Cygan et al. 2004).
+
+    Parameters
+    ----------
+    film_atoms : list of dict or list of Atom
+        Surface atoms of the thin film to screen against the glass.
+        Each dict must have ``"element"``, ``"charge"``, ``"position"``.
+        Film positions must be in the same Cartesian system as the glass
+        (film z-coordinates should be > 1.6 Å, typically starting at ~3.5 Å).
+    cutoff : float or None
+        Maximum atom–atom distance (Å) to include.  ``None`` = all pairs.
+    glass_variant : str
+        Which glass composition to use as the fixed substrate:
+
+        * ``"borosilicate"``    — default, SiO₂ + B₂O₃ + silanol (12 atoms)
+        * ``"fused_silica"``    — pure SiO₂, no boron (10 atoms)
+        * ``"aluminosilicate"`` — SiO₂ + Al₂O₃ component (12 atoms)
+        * ``"soda_lime"``       — SiO₂ + Na network modifier (12 atoms)
+
+    verbose : bool
+        If ``True`` (default), print a formatted summary table to stdout.
+
+    Returns
+    -------
+    dict with all keys from :func:`analyze_surface_interactions` plus:
+
+    ``glass_variant``
+        str – which glass composition was used as the fixed substrate.
+    ``glass_atoms``
+        list[Atom] – the fixed glass surface atoms that were used.
+
+    Examples
+    --------
+    Basic usage — only provide the film::
+
+        from surface_dipole_library import analyze_film_on_glass
+
+        tio2_film = [
+            {"element": "Ti", "charge":  0.580, "position": [0.00, 0.00, 3.50]},
+            {"element": "Ti", "charge":  0.580, "position": [2.96, 0.00, 3.50]},
+            {"element": "O",  "charge": -0.290, "position": [1.48, 0.00, 4.20]},
+            {"element": "O",  "charge": -0.260, "position": [0.00, 1.62, 3.80]},
+        ]
+
+        result = analyze_film_on_glass(tio2_film, cutoff=6.0)
+        print(result["interaction_table"])
+        print(result["glass_variant"])   # "borosilicate"
+
+    Using a different glass variant::
+
+        result = analyze_film_on_glass(film_atoms, glass_variant="fused_silica")
+
+    Load film from a file then screen against glass::
+
+        from surface_dipole_library import load_from_poscar, analyze_film_on_glass
+
+        film = load_from_poscar("CONTCAR", charges={"Zn": 0.40, "O": -0.40})
+        result = analyze_film_on_glass(film, cutoff=8.0)
+
+    Raises
+    ------
+    ValueError
+        If ``film_atoms`` is empty, ``glass_variant`` is unknown, or no pairs
+        fall within *cutoff*.
+    """
+    # ── 1. Load fixed glass substrate ─────────────────────────────────────
+    glass = get_glass_atoms(glass_variant)
+
+    if verbose:
+        print(f"\n  [Glass Substrate Fixed]  variant = '{glass_variant}'  "
+              f"({len(glass)} atoms)")
+
+    # ── 2. Run standard analysis ───────────────────────────────────────────
+    result = analyze_surface_interactions(
+        substrate_atoms=glass,
+        film_atoms=film_atoms,
+        cutoff=cutoff,
+        verbose=verbose,
+    )
+
+    # ── 3. Attach glass-specific metadata ─────────────────────────────────
+    result["glass_variant"] = glass_variant
+    result["glass_atoms"]   = glass
+
+    return result
+
+
+def analyze_film_on_glass_from_xyz(
+    film_file: Union[str, Path],
+    cutoff: Optional[float] = None,
+    glass_variant: str = "borosilicate",
+    has_charges: bool = True,
+    verbose: bool = True,
+) -> Dict[str, Any]:
+    """
+    Load the film from an XYZ file; substrate is always the fixed glass.
+
+    Parameters
+    ----------
+    film_file : str or Path
+        Path to the film XYZ file (5-column: element x y z charge).
+    cutoff : float or None
+    glass_variant : str
+        See :func:`analyze_film_on_glass`.
+    has_charges : bool
+        If ``True`` expect the 5th column to be the partial charge.
+    verbose : bool
+
+    Returns
+    -------
+    Same dict as :func:`analyze_film_on_glass`.
+
+    Example
+    -------
+    >>> result = analyze_film_on_glass_from_xyz("zno_film.xyz", cutoff=7.0)
+    """
+    film_atoms = load_from_xyz(film_file, prefix="film_", has_charges=has_charges)
+    return analyze_film_on_glass(
+        film_atoms,
+        cutoff=cutoff,
+        glass_variant=glass_variant,
+        verbose=verbose,
+    )
+
+
+def analyze_film_on_glass_from_ase(
+    film_file: Union[str, Path],
+    film_charges: Optional[Dict[str, float]] = None,
+    cutoff: Optional[float] = None,
+    glass_variant: str = "borosilicate",
+    verbose: bool = True,
+) -> Dict[str, Any]:
+    """
+    Load the film via ASE (.cif, POSCAR, etc.); substrate is the fixed glass.
+
+    Parameters
+    ----------
+    film_file : str or Path
+        Any file format ASE can read (.cif, POSCAR, .vasp, .xyz …).
+    film_charges : dict {element: charge} or None
+        Partial charges by element symbol.  Required if the file does not
+        store charges (most structure files do not).
+    cutoff : float or None
+    glass_variant : str
+        See :func:`analyze_film_on_glass`.
+    verbose : bool
+
+    Returns
+    -------
+    Same dict as :func:`analyze_film_on_glass`.
+
+    Example
+    -------
+    >>> result = analyze_film_on_glass_from_ase(
+    ...     "ZnO.cif",
+    ...     film_charges={"Zn": 0.40, "O": -0.40},
+    ...     cutoff=6.0,
+    ... )
+    """
+    film_atoms = load_from_ase(film_file, charges=film_charges, prefix="film_")
+    return analyze_film_on_glass(
+        film_atoms,
+        cutoff=cutoff,
+        glass_variant=glass_variant,
+        verbose=verbose,
+    )

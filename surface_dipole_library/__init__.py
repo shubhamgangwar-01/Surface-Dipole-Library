@@ -49,6 +49,19 @@ from .main import (
     analyze_surface_interactions,
     analyze_from_xyz,
     analyze_from_ase,
+    # Glass-fixed API  — substrate locked to borosilicate glass
+    analyze_film_on_glass,
+    analyze_film_on_glass_from_xyz,
+    analyze_film_on_glass_from_ase,
+)
+
+# Fixed glass substrate
+from .glass_substrate import (
+    BOROSILICATE_GLASS_SURFACE,
+    GLASS_VARIANTS,
+    get_glass_surface,
+    get_glass_atoms,
+    glass_surface_info,
 )
 
 # Atom class and helpers
@@ -118,6 +131,16 @@ __all__ = [
     "analyze_surface_interactions",
     "analyze_from_xyz",
     "analyze_from_ase",
+    # Glass-fixed API
+    "analyze_film_on_glass",
+    "analyze_film_on_glass_from_xyz",
+    "analyze_film_on_glass_from_ase",
+    # Fixed glass substrate
+    "BOROSILICATE_GLASS_SURFACE",
+    "GLASS_VARIANTS",
+    "get_glass_surface",
+    "get_glass_atoms",
+    "glass_surface_info",
     # Atom
     "Atom",
     "atoms_from_dicts",

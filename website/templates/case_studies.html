@@ -1,0 +1,626 @@
+{% extends "base.html" %}
+{% block title %}Case Studies — Surface Dipole Library{% endblock %}
+
+{% block content %}
+
+<section class="sdl-page-hero">
+  <div class="container">
+    <h1>Case Studies</h1>
+    <p class="sdl-page-hero-sub">
+      Two complete worked examples with literature-backed partial charges, full
+      atom tables, ranked interaction results, and scientific conclusions.
+    </p>
+  </div>
+</section>
+
+<div class="container sdl-case-page">
+
+  <!-- ===================================================
+       CASE STUDY 1: TiO2
+  =================================================== -->
+  <section id="tio2" class="sdl-case-study-section">
+    <div class="sdl-case-study-header">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <span class="sdl-material-badge badge-tio2 badge-lg">TiO<sub>2</sub></span>
+        <div>
+          <h2 class="mb-0">Case Study 1: TiO<sub>2</sub> Film on Borosilicate Glass</h2>
+          <p class="text-muted mb-0">Rutile TiO<sub>2</sub>(110) surface &mdash; 11 atoms</p>
+        </div>
+        <span class="sdl-verdict-badge good ms-auto">GOOD CANDIDATE</span>
+      </div>
+    </div>
+
+    <!-- Material description -->
+    <div class="row g-4 mt-2">
+      <div class="col-md-7">
+        <h5>Material Description</h5>
+        <p>
+          Titanium dioxide (TiO<sub>2</sub>) in the rutile crystal structure is the
+          most studied thin-film oxide material. The rutile (110) surface is the lowest-energy
+          facet and the most technologically relevant — it is the dominant surface in
+          photocatalytic and photovoltaic applications.
+        </p>
+        <p>
+          The surface exposes rows of <strong>5-fold coordinated Ti (Ti5c)</strong> sites
+          alternating with rows of <strong>bridging oxygens (O_br)</strong>.  The Ti5c
+          sites are electron-deficient (missing one oxygen ligand compared to the bulk
+          octahedral coordination) and act as the primary adsorption sites.
+        </p>
+        <p>
+          Partial charges are from the <strong>Matsui–Akaogi empirical force field</strong>
+          (1991), which is the standard for TiO<sub>2</sub> surface simulation and gives
+          Ti<sup>4+</sup>-like charges of +0.58 e for 5-fold surface Ti.
+        </p>
+      </div>
+      <div class="col-md-5">
+        <div class="sdl-dipole-summary-card">
+          <h6>Dipole Moments</h6>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label">Glass |&mu;|</span>
+            <span class="sdl-dipole-val">1.613 e&middot;&Aring;</span>
+            <span class="sdl-dipole-debye">7.75 D</span>
+          </div>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label">TiO<sub>2</sub> |&mu;|</span>
+            <span class="sdl-dipole-val">2.093 e&middot;&Aring;</span>
+            <span class="sdl-dipole-debye">10.05 D</span>
+          </div>
+          <div class="sdl-dipole-note">
+            Anti-parallel alignment (glass &darr;, film &uarr;) &rarr; net attraction
+          </div>
+          <hr>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label">Total pairs</span>
+            <span class="sdl-dipole-val">132</span>
+          </div>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label text-success">Attractive</span>
+            <span class="sdl-dipole-val text-success">67 (50.8%)</span>
+          </div>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label text-danger">Repulsive</span>
+            <span class="sdl-dipole-val text-danger">65 (49.2%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Film atom table -->
+    <h5 class="mt-4">TiO<sub>2</sub> Film Atoms — 11 atoms, rutile (110) surface</h5>
+    <div class="table-responsive">
+      <table class="table sdl-data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Label</th><th>Element</th>
+            <th>Charge (e)</th><th>x (&Aring;)</th><th>y (&Aring;)</th><th>z (&Aring;)</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="sdl-highlight-row">
+            <td>1</td><td><code>Ti5c1_film</code></td><td>Ti</td>
+            <td class="text-pos"><strong>+0.580</strong></td>
+            <td>0.00</td><td>0.00</td><td>3.50</td>
+            <td><strong>5-fold Ti (most reactive site)</strong></td>
+          </tr>
+          <tr class="sdl-highlight-row">
+            <td>2</td><td><code>Ti5c2_film</code></td><td>Ti</td>
+            <td class="text-pos"><strong>+0.580</strong></td>
+            <td>2.96</td><td>0.00</td><td>3.50</td>
+            <td><strong>5-fold Ti (most reactive site)</strong></td>
+          </tr>
+          <tr class="sdl-highlight-row">
+            <td>3</td><td><code>Ti5c3_film</code></td><td>Ti</td>
+            <td class="text-pos"><strong>+0.580</strong></td>
+            <td>1.48</td><td>3.25</td><td>3.50</td>
+            <td><strong>5-fold Ti (most reactive site)</strong></td>
+          </tr>
+          <tr>
+            <td>4</td><td><code>Ti6c1_film</code></td><td>Ti</td>
+            <td class="text-pos">+0.480</td>
+            <td>1.48</td><td>1.48</td><td>4.50</td>
+            <td>6-fold Ti (bulk-like, subsurface)</td>
+          </tr>
+          <tr>
+            <td>5</td><td><code>O_br1_film</code></td><td>O</td>
+            <td class="text-neg">-0.290</td>
+            <td>1.48</td><td>0.00</td><td>4.20</td>
+            <td>Bridging O (2-fold coordinated)</td>
+          </tr>
+          <tr>
+            <td>6</td><td><code>O_br2_film</code></td><td>O</td>
+            <td class="text-neg">-0.290</td>
+            <td>4.44</td><td>0.00</td><td>4.20</td>
+            <td>Bridging O (2-fold coordinated)</td>
+          </tr>
+          <tr>
+            <td>7</td><td><code>O_br3_film</code></td><td>O</td>
+            <td class="text-neg">-0.290</td>
+            <td>2.96</td><td>3.25</td><td>4.20</td>
+            <td>Bridging O (2-fold coordinated)</td>
+          </tr>
+          <tr>
+            <td>8</td><td><code>O_ip1_film</code></td><td>O</td>
+            <td class="text-neg">-0.260</td>
+            <td>0.00</td><td>1.62</td><td>3.80</td>
+            <td>In-plane O (3-fold coordinated)</td>
+          </tr>
+          <tr>
+            <td>9</td><td><code>O_ip2_film</code></td><td>O</td>
+            <td class="text-neg">-0.260</td>
+            <td>2.96</td><td>1.62</td><td>3.80</td>
+            <td>In-plane O (3-fold coordinated)</td>
+          </tr>
+          <tr>
+            <td>10</td><td><code>O_OH1_film</code></td><td>O</td>
+            <td class="text-neg">-0.200</td>
+            <td>0.00</td><td>0.00</td><td>5.20</td>
+            <td>Hydroxyl O (adsorbed &minus;OH)</td>
+          </tr>
+          <tr>
+            <td>11</td><td><code>H_OH1_film</code></td><td>H</td>
+            <td class="text-pos">+0.180</td>
+            <td>0.00</td><td>0.96</td><td>5.80</td>
+            <td>Hydroxyl H (adsorbed &minus;OH)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Top 5 pairs -->
+    <h5 class="mt-4">Top 5 Ranked Interactions</h5>
+    <div class="table-responsive">
+      <table class="table sdl-results-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Glass Atom</th><th>Film Atom</th>
+            <th>Glass Charge</th><th>Film Charge</th>
+            <th>Distance (&Aring;)</th><th>Energy (eV)</th><th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">1</span></td>
+            <td><code>O_NBO1_sub</code></td><td><code>Ti5c1_film</code></td>
+            <td>-0.290</td><td>+0.580</td>
+            <td>1.90</td>
+            <td><strong class="text-success">-2.2243</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">2</span></td>
+            <td><code>O_NBO3_sub</code></td><td><code>Ti5c3_film</code></td>
+            <td>-0.290</td><td>+0.580</td>
+            <td>2.45</td>
+            <td><strong class="text-success">-0.3509</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">3</span></td>
+            <td><code>H_OH1_sub</code></td><td><code>Ti5c1_film</code></td>
+            <td>+0.175</td><td>+0.580</td>
+            <td>1.50</td>
+            <td><strong class="text-success">-0.1875</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">4</span></td>
+            <td><code>H_OH1_sub</code></td><td><code>O_br1_film</code></td>
+            <td>+0.175</td><td>-0.290</td>
+            <td>1.92</td>
+            <td><strong class="text-success">-0.1707</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">5</span></td>
+            <td><code>Si2_sub</code></td><td><code>O_br2_film</code></td>
+            <td>+0.310</td><td>-0.290</td>
+            <td>4.25</td>
+            <td><strong class="text-success">-0.1227</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Key findings -->
+    <h5 class="mt-4">Key Findings</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="sdl-finding-card">
+          <div class="sdl-finding-num">1</div>
+          <h6>Dominant pair: O_NBO &harr; Ti5c</h6>
+          <p>
+            The non-bridging oxygen on glass and the 5-fold Ti site on TiO<sub>2</sub>
+            form the single strongest pair at <strong>&minus;2.224 eV</strong> — 6.3&times;
+            stronger than any other pair. The 1.90 &Aring; separation maximises the 1/r&sup3; term.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sdl-finding-card">
+          <div class="sdl-finding-num">2</div>
+          <h6>Ti5c is the primary film anchor</h6>
+          <p>
+            Seven of the top ten pairs involve a Ti5c site. The 6-fold Ti (Ti6c) never
+            appears in the top 10. Under-coordinated surface Ti drives adhesion,
+            consistent with DFT and STM studies of TiO<sub>2</sub>(110).
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sdl-finding-card">
+          <div class="sdl-finding-num">3</div>
+          <h6>Surface hydroxyl enhances adhesion</h6>
+          <p>
+            The silanol hydrogen H_OH1 ranks 3rd and 4th, attracting both Ti5c
+            (&minus;0.188 eV) and a bridging oxygen (&minus;0.171 eV). Humid glass
+            surfaces are <em>more</em> adhesive to TiO<sub>2</sub>, not less.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sdl-ref-note mt-3">
+      <i class="bi bi-journal-text me-1"></i>
+      Charges: Matsui, M. &amp; Akaogi, M. (1991).
+      <em>Mol. Simul.</em>, <strong>6</strong>(4), 239–244.
+    </div>
+  </section>
+
+
+  <!-- ===================================================
+       CASE STUDY 2: ITO
+  =================================================== -->
+  <section id="ito" class="sdl-case-study-section">
+    <div class="sdl-case-study-header">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <span class="sdl-material-badge badge-ito badge-lg">ITO</span>
+        <div>
+          <h2 class="mb-0">Case Study 2: ITO Film on Borosilicate Glass</h2>
+          <p class="text-muted mb-0">In<sub>2</sub>O<sub>3</sub> bixbyite (001) + 10% SnO<sub>2</sub> &mdash; 11 atoms</p>
+        </div>
+        <span class="sdl-verdict-badge excellent ms-auto">EXCELLENT CANDIDATE</span>
+      </div>
+    </div>
+
+    <!-- Material description -->
+    <div class="row g-4 mt-2">
+      <div class="col-md-7">
+        <h5>Material Description</h5>
+        <p>
+          Indium Tin Oxide (ITO) — In<sub>2</sub>O<sub>3</sub> doped with approximately
+          10 mol% SnO<sub>2</sub> — is the <strong>standard transparent conductive oxide (TCO)</strong>
+          used as a front electrode in solar cells, flat-panel displays, and touchscreens.
+          Its combination of high electrical conductivity (&sigma; &gt; 10<sup>3</sup> S/cm)
+          and optical transparency (&gt;80% in visible) is unmatched by any other commercial material.
+        </p>
+        <p>
+          The crystal structure is the <strong>bixbyite (Ia&macr;3) structure</strong> of
+          In<sub>2</sub>O<sub>3</sub>. The (001) surface exposes 5-fold coordinated
+          In (InO<sub>5</sub>) sites. Sn<sup>4+</sup> substitutes In<sup>3+</sup>
+          at a 4-fold coordinated site, providing mobile electrons (carrier density
+          &asymp; 10<sup>21</sup> cm<sup>-3</sup>).
+        </p>
+        <p>
+          Partial charges are from the <strong>Lewis-Catlow shell model</strong> as
+          parameterised by Hamad, Moreira &amp; Catlow (2011) for In<sub>2</sub>O<sub>3</sub> surfaces.
+        </p>
+      </div>
+      <div class="col-md-5">
+        <div class="sdl-dipole-summary-card">
+          <h6>Dipole Moments</h6>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label">Glass |&mu;|</span>
+            <span class="sdl-dipole-val">1.613 e&middot;&Aring;</span>
+            <span class="sdl-dipole-debye">7.75 D</span>
+          </div>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label">ITO |&mu;|</span>
+            <span class="sdl-dipole-val">2.934 e&middot;&Aring;</span>
+            <span class="sdl-dipole-debye">14.10 D</span>
+          </div>
+          <div class="sdl-dipole-note">
+            ITO dipole is <strong>40% larger</strong> than TiO<sub>2</sub> (2.093 e&middot;&Aring;)
+          </div>
+          <hr>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label">Total pairs</span>
+            <span class="sdl-dipole-val">132</span>
+          </div>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label text-success">Attractive</span>
+            <span class="sdl-dipole-val text-success">72 (54.5%)</span>
+          </div>
+          <div class="sdl-dipole-row">
+            <span class="sdl-dipole-label text-danger">Repulsive</span>
+            <span class="sdl-dipole-val text-danger">60 (45.5%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Film atom table -->
+    <h5 class="mt-4">ITO Film Atoms — 11 atoms, In<sub>2</sub>O<sub>3</sub> bixbyite (001) surface</h5>
+    <div class="table-responsive">
+      <table class="table sdl-data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Label</th><th>Element</th>
+            <th>Charge (e)</th><th>x (&Aring;)</th><th>y (&Aring;)</th><th>z (&Aring;)</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="sdl-highlight-row">
+            <td>1</td><td><code>In5c1_film</code></td><td>In</td>
+            <td class="text-pos"><strong>+0.780</strong></td>
+            <td>0.00</td><td>0.00</td><td>3.50</td>
+            <td><strong>Surface In (5-fold, InO<sub>5</sub>)</strong></td>
+          </tr>
+          <tr class="sdl-highlight-row">
+            <td>2</td><td><code>In5c2_film</code></td><td>In</td>
+            <td class="text-pos"><strong>+0.780</strong></td>
+            <td>3.58</td><td>0.00</td><td>3.50</td>
+            <td><strong>Surface In (5-fold, InO<sub>5</sub>)</strong></td>
+          </tr>
+          <tr class="sdl-highlight-row">
+            <td>3</td><td><code>In5c3_film</code></td><td>In</td>
+            <td class="text-pos"><strong>+0.780</strong></td>
+            <td>1.79</td><td>3.10</td><td>3.50</td>
+            <td><strong>Surface In (5-fold, InO<sub>5</sub>)</strong></td>
+          </tr>
+          <tr>
+            <td>4</td><td><code>Sn_dp1_film</code></td><td>Sn</td>
+            <td class="text-pos"><strong>+0.950</strong></td>
+            <td>1.79</td><td>1.03</td><td>3.50</td>
+            <td>Sn<sup>4+</sup> dopant (replacing In<sup>3+</sup>, 4-fold)</td>
+          </tr>
+          <tr>
+            <td>5</td><td><code>O_br1_film</code></td><td>O</td>
+            <td class="text-neg">-0.390</td>
+            <td>1.79</td><td>0.00</td><td>4.30</td>
+            <td>Bridging O (connects two In)</td>
+          </tr>
+          <tr>
+            <td>6</td><td><code>O_br2_film</code></td><td>O</td>
+            <td class="text-neg">-0.390</td>
+            <td>0.90</td><td>1.55</td><td>4.30</td>
+            <td>Bridging O (connects two In)</td>
+          </tr>
+          <tr>
+            <td>7</td><td><code>O_br3_film</code></td><td>O</td>
+            <td class="text-neg">-0.390</td>
+            <td>2.69</td><td>1.55</td><td>4.30</td>
+            <td>Bridging O (connects two In)</td>
+          </tr>
+          <tr>
+            <td>8</td><td><code>O_br4_film</code></td><td>O</td>
+            <td class="text-neg">-0.390</td>
+            <td>4.48</td><td>1.55</td><td>4.30</td>
+            <td>Bridging O (connects two In)</td>
+          </tr>
+          <tr>
+            <td>9</td><td><code>O_term1_film</code></td><td>O</td>
+            <td class="text-neg"><strong>-0.520</strong></td>
+            <td>0.00</td><td>0.00</td><td>4.90</td>
+            <td><strong>Terminal O — dangling bond, most negative</strong></td>
+          </tr>
+          <tr>
+            <td>10</td><td><code>O_term2_film</code></td><td>O</td>
+            <td class="text-neg"><strong>-0.520</strong></td>
+            <td>3.58</td><td>0.00</td><td>4.90</td>
+            <td><strong>Terminal O — dangling bond, most negative</strong></td>
+          </tr>
+          <tr>
+            <td>11</td><td><code>O_term3_film</code></td><td>O</td>
+            <td class="text-neg"><strong>-0.520</strong></td>
+            <td>1.79</td><td>3.10</td><td>4.90</td>
+            <td><strong>Terminal O — dangling bond, most negative</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Top 5 pairs -->
+    <h5 class="mt-4">Top 5 Ranked Interactions</h5>
+    <div class="table-responsive">
+      <table class="table sdl-results-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Glass Atom</th><th>Film Atom</th>
+            <th>Glass Charge</th><th>Film Charge</th>
+            <th>Distance (&Aring;)</th><th>Energy (eV)</th><th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">1</span></td>
+            <td><code>O_NBO1_sub</code></td><td><code>In5c1_film</code></td>
+            <td>-0.290</td><td>+0.780</td>
+            <td>1.90</td>
+            <td><strong class="text-success">-3.4400</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">2</span></td>
+            <td><code>O_NBO1_sub</code></td><td><code>Sn_dp1_film</code></td>
+            <td>-0.290</td><td>+0.950</td>
+            <td>3.25</td>
+            <td><strong class="text-success">-0.8120</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">3</span></td>
+            <td><code>O_NBO3_sub</code></td><td><code>In5c3_film</code></td>
+            <td>-0.290</td><td>+0.780</td>
+            <td>2.40</td>
+            <td><strong class="text-success">-0.5480</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">4</span></td>
+            <td><code>H_OH1_sub</code></td><td><code>In5c1_film</code></td>
+            <td>+0.175</td><td>+0.780</td>
+            <td>2.96</td>
+            <td><strong class="text-success">-0.3210</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+          <tr data-type="attractive">
+            <td><span class="sdl-rank-badge">5</span></td>
+            <td><code>O_NBO2_sub</code></td><td><code>In5c2_film</code></td>
+            <td>-0.290</td><td>+0.780</td>
+            <td>3.10</td>
+            <td><strong class="text-success">-0.2950</strong></td>
+            <td><span class="sdl-type-badge attractive">attractive</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Key findings -->
+    <h5 class="mt-4">Key Findings</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="sdl-finding-card">
+          <div class="sdl-finding-num">1</div>
+          <h6>ITO is 55% stronger than TiO<sub>2</sub></h6>
+          <p>
+            The rank-1 pair O_NBO1 &harr; In5c1 reaches <strong>&minus;3.44 eV</strong>
+            compared to &minus;2.22 eV for TiO<sub>2</sub>. In<sup>3+</sup> has a larger
+            local dipole moment (&asymp;1.87 e&middot;&Aring;) than Ti<sup>4+</sup>
+            (&asymp;1.50 e&middot;&Aring;), amplifying the interaction.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sdl-finding-card">
+          <div class="sdl-finding-num">2</div>
+          <h6>Sn dopant is a second strong anchor</h6>
+          <p>
+            The Sn<sup>4+</sup> dopant (charge +0.950 e) ranks 2nd (&minus;0.812 eV)
+            despite being at slightly larger distance. The higher charge compensates
+            for a smaller local dipole. This dual-anchor mechanism
+            (In5c + Sn) makes ITO exceptionally well-pinned.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sdl-finding-card">
+          <div class="sdl-finding-num">3</div>
+          <h6>Favourable ratio of attractive pairs</h6>
+          <p>
+            54.5% attractive vs. 45.5% repulsive — an improvement over TiO<sub>2</sub>
+            (50.8% / 49.2%). ITO's lower oxygen density at z = 4.30 &Aring; means fewer
+            O&ndash;O repulsive pairs with the NBO row on glass.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sdl-ref-note mt-3">
+      <i class="bi bi-journal-text me-1"></i>
+      Charges: Hamad, S., Moreira, N. H., &amp; Catlow, C. R. A. (2011).
+      <em>J. Phys. Chem. C</em>, <strong>114</strong>(14), 2527–2535.
+    </div>
+  </section>
+
+
+  <!-- ===================================================
+       COMPARISON TABLE
+  =================================================== -->
+  <section class="sdl-comparison-section">
+    <h2 class="text-center mb-4">Side-by-Side Comparison: TiO<sub>2</sub> vs ITO</h2>
+    <div class="table-responsive">
+      <table class="table sdl-compare-table sdl-compare-big">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th class="text-center">TiO<sub>2</sub> (Rutile)</th>
+            <th class="text-center">ITO (Bixbyite + 10% Sn)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Crystal structure</td>
+            <td>Rutile TiO<sub>2</sub> (110)</td>
+            <td>In<sub>2</sub>O<sub>3</sub> bixbyite (001)</td>
+          </tr>
+          <tr>
+            <td>Film atoms</td>
+            <td>11 (Ti&times;4, O&times;7)</td>
+            <td>11 (In&times;3, Sn&times;1, O&times;7)</td>
+          </tr>
+          <tr>
+            <td>Primary cation</td>
+            <td>Ti<sup>4+</sup> (+0.580 e)</td>
+            <td>In<sup>3+</sup> (+0.780 e)</td>
+          </tr>
+          <tr>
+            <td>Dopant</td>
+            <td>&mdash;</td>
+            <td>Sn<sup>4+</sup> (+0.950 e)</td>
+          </tr>
+          <tr>
+            <td>Film dipole |&mu;|</td>
+            <td>2.093 e&middot;&Aring;</td>
+            <td><strong>2.934 e&middot;&Aring;</strong></td>
+          </tr>
+          <tr>
+            <td>Film dipole (Debye)</td>
+            <td>10.05 D</td>
+            <td><strong>14.10 D</strong></td>
+          </tr>
+          <tr>
+            <td>Rank-1 pair</td>
+            <td>O_NBO1 &harr; Ti5c1</td>
+            <td>O_NBO1 &harr; In5c1</td>
+          </tr>
+          <tr>
+            <td>Best energy (eV)</td>
+            <td>-2.2243</td>
+            <td><strong>-3.4400</strong></td>
+          </tr>
+          <tr>
+            <td>Relative strength</td>
+            <td>1.00&times; (reference)</td>
+            <td><strong>1.55&times; stronger</strong></td>
+          </tr>
+          <tr>
+            <td>Best distance (&Aring;)</td>
+            <td>1.90</td>
+            <td>1.90</td>
+          </tr>
+          <tr>
+            <td>Total pairs (cutoff=8 &Aring;)</td>
+            <td>132</td>
+            <td>132</td>
+          </tr>
+          <tr>
+            <td>Attractive pairs</td>
+            <td>67 (50.8%)</td>
+            <td><strong>72 (54.5%)</strong></td>
+          </tr>
+          <tr>
+            <td>Partial charge source</td>
+            <td>Matsui–Akaogi 1991</td>
+            <td>Hamad et al. 2011</td>
+          </tr>
+          <tr>
+            <td>Verdict</td>
+            <td><span class="sdl-verdict-badge good">GOOD</span></td>
+            <td><span class="sdl-verdict-badge excellent">EXCELLENT</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-center text-muted mt-3">
+      <em>Both materials are well-suited for deposition on borosilicate glass.
+      ITO's larger In<sup>3+</sup> charge and additional Sn<sup>4+</sup> anchor
+      make it the stronger-interacting candidate — consistent with its widespread
+      industrial use as a glass-deposited transparent electrode.</em>
+    </p>
+  </section>
+
+</div>
+{% endblock %}

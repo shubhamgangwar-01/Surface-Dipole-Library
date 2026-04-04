@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% block title %}Surface Dipole Library — Screen Glass–Film Interfaces{% endblock %}
+
+{% block content %}
+
+<!-- =========================================================
+     HERO SECTION
+========================================================= -->
+<section class="sdl-hero">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+
+      <!-- Left: heading + CTAs -->
+      <div class="col-lg-7">
+        <p class="sdl-hero-label">
+          <i class="bi bi-cpu me-1"></i>Python &middot; v1.0.0 &middot; MIT License
+        </p>
+        <h1 class="sdl-hero-title">Surface Dipole<br>Library</h1>
+        <p class="sdl-hero-sub">
+          Screen glass–thin-film interfaces in seconds.<br>
+          Rank candidates before DFT.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <a href="{{ url_for('tool') }}" class="btn sdl-btn-primary btn-lg">
+            Try the Tool <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+          <a href="{{ url_for('docs') }}" class="btn sdl-btn-outline btn-lg">
+            Read the Docs
+          </a>
+        </div>
+        <div class="sdl-hero-pip mt-4">
+          <code class="sdl-code-inline">pip install surface-dipole-library</code>
+        </div>
+      </div>
+
+      <!-- Right: stat boxes -->
+      <div class="col-lg-5">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="sdl-stat-card">
+              <div class="sdl-stat-num">8</div>
+              <div class="sdl-stat-label">Modules</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="sdl-stat-card">
+              <div class="sdl-stat-num">5</div>
+              <div class="sdl-stat-label">Analysis steps</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="sdl-stat-card">
+              <div class="sdl-stat-num">132</div>
+              <div class="sdl-stat-label">Pairs per test run</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="sdl-stat-card">
+              <div class="sdl-stat-num">4</div>
+              <div class="sdl-stat-label">Glass variants</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     WHAT IT DOES
+========================================================= -->
+<section class="sdl-section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="sdl-section-title">What it does</h2>
+      <p class="sdl-section-sub">
+        A focused, production-ready library designed for one task: ranking
+        glass–film interface candidates before expensive DFT simulations.
+      </p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="sdl-card h-100">
+          <div class="sdl-card-icon sdl-icon-red">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <h4>The Problem</h4>
+          <p>
+            Depositing a thin film on glass requires choosing the right material
+            and deposition conditions.  DFT calculations for each candidate can
+            take days per system.  You need a way to triage candidates first.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sdl-card h-100">
+          <div class="sdl-card-icon sdl-icon-blue">
+            <i class="bi bi-lightning-charge"></i>
+          </div>
+          <h4>The Solution</h4>
+          <p>
+            <strong>surface_dipole_library</strong> computes the dipole moment
+            of each surface atom group, then evaluates the dipole–dipole interaction
+            energy for every substrate–film atom pair using classical electrostatics —
+            all in under a second.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="sdl-card h-100">
+          <div class="sdl-card-icon sdl-icon-green">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <h4>The Outcome</h4>
+          <p>
+            A ranked DataFrame sorted from the strongest attractive pair to the
+            strongest repulsive pair, plus bulk dipole moments, best interaction
+            summary, and statistics.  Use this to rank candidates and guide DFT
+            input — only simulate the most promising interfaces.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     HOW IT WORKS — 5 STEPS
+========================================================= -->
+<section class="sdl-section sdl-section-alt">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="sdl-section-title">How it works</h2>
+      <p class="sdl-section-sub">
+        Five deterministic steps from atom input to ranked interaction table.
+      </p>
+    </div>
+    <div class="row g-3 justify-content-center">
+
+      <div class="col-md col-sm-6">
+        <div class="sdl-step-card text-center h-100">
+          <div class="sdl-step-num">1</div>
+          <h6 class="sdl-step-title">Input Atoms</h6>
+          <p class="sdl-step-body">
+            Define film atoms with element symbol, partial charge (e), and
+            Cartesian position (Å). The glass substrate is fixed automatically.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md col-sm-6">
+        <div class="sdl-step-card text-center h-100">
+          <div class="sdl-step-num">2</div>
+          <h6 class="sdl-step-title">Dipole Moments</h6>
+          <p class="sdl-step-body">
+            Compute <strong>&mu; = &Sigma;q<sub>i</sub>r<sub>i</sub></strong> for
+            both surfaces. Quantifies the net charge displacement of each group.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md col-sm-6">
+        <div class="sdl-step-card text-center h-100">
+          <div class="sdl-step-num">3</div>
+          <h6 class="sdl-step-title">Local Dipoles</h6>
+          <p class="sdl-step-body">
+            Per-atom effective dipole relative to group centroid:
+            <strong>&mu;<sub>i</sub> = q<sub>i</sub>(r<sub>i</sub> &minus; r<sub>c</sub>)</strong>.
+            Origin-independent by design.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md col-sm-6">
+        <div class="sdl-step-card text-center h-100">
+          <div class="sdl-step-num">4</div>
+          <h6 class="sdl-step-title">Pairwise Energies</h6>
+          <p class="sdl-step-body">
+            All N&times;M pairs evaluated with the dipole–dipole formula.
+            Distance cutoff filters out long-range negligible interactions.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md col-sm-6">
+        <div class="sdl-step-card text-center h-100">
+          <div class="sdl-step-num">5</div>
+          <h6 class="sdl-step-title">Ranked Table</h6>
+          <p class="sdl-step-body">
+            DataFrame sorted by energy (most negative = rank 1). Green rows
+            are attractive; red rows are repulsive. Guides deposition strategy.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     WHY BEFORE DFT
+========================================================= -->
+<section class="sdl-section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="sdl-section-title">Why screen before DFT?</h2>
+      <p class="sdl-section-sub">
+        Classical dipole screening catches the strongest interactions first — in a
+        fraction of the compute time.
+      </p>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="sdl-compare-table-wrap">
+          <table class="table sdl-compare-table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th class="text-danger">Without library</th>
+                <th class="text-success">With library</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Time per candidate</td>
+                <td><i class="bi bi-x-circle-fill text-danger me-1"></i>Hours to days (DFT)</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>&lt; 1 second</td>
+              </tr>
+              <tr>
+                <td>Candidates screened</td>
+                <td><i class="bi bi-x-circle-fill text-danger me-1"></i>1–2 per week</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>Dozens per minute</td>
+              </tr>
+              <tr>
+                <td>Interaction ranking</td>
+                <td><i class="bi bi-x-circle-fill text-danger me-1"></i>Unknown until simulation</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>Full ranked table instantly</td>
+              </tr>
+              <tr>
+                <td>Identify active sites</td>
+                <td><i class="bi bi-x-circle-fill text-danger me-1"></i>Requires post-processing</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>Named atom pairs at rank 1</td>
+              </tr>
+              <tr>
+                <td>Compute cost</td>
+                <td><i class="bi bi-x-circle-fill text-danger me-1"></i>HPC cluster required</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>Runs on a laptop</td>
+              </tr>
+              <tr>
+                <td>Partial charges needed</td>
+                <td><i class="bi bi-dash-circle-fill text-secondary me-1"></i>Computed by DFT anyway</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>ClayFF / literature values</td>
+              </tr>
+              <tr>
+                <td>Glass substrate</td>
+                <td><i class="bi bi-x-circle-fill text-danger me-1"></i>Must model separately</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>Built-in 12-atom model (4 variants)</td>
+              </tr>
+              <tr>
+                <td>Output format</td>
+                <td><i class="bi bi-dash-circle-fill text-secondary me-1"></i>Raw OUTCAR / vasprun.xml</td>
+                <td><i class="bi bi-check-circle-fill text-success me-1"></i>Pandas DataFrame + JSON API</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     CASE STUDY TEASER
+========================================================= -->
+<section class="sdl-section sdl-section-alt">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="sdl-section-title">Validated case studies</h2>
+      <p class="sdl-section-sub">
+        Two complete worked examples with real material data and literature-backed charges.
+      </p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5">
+        <div class="sdl-card sdl-case-card h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="sdl-material-badge badge-tio2">TiO<sub>2</sub></span>
+            <h5 class="mb-0">TiO<sub>2</sub> on Borosilicate Glass</h5>
+          </div>
+          <p class="text-muted mb-3">
+            Rutile TiO<sub>2</sub>(110) surface — 11 atoms — screened against
+            the fixed borosilicate glass substrate.
+          </p>
+          <ul class="sdl-case-bullets">
+            <li>Best pair: O_NBO1 &harr; Ti5c1 at <strong>&minus;2.224 eV</strong></li>
+            <li>132 pairs evaluated, 67 attractive (50.8%)</li>
+            <li>Film dipole |&mu;| = 2.093 e&middot;&Aring;</li>
+          </ul>
+          <div class="mt-3">
+            <span class="sdl-verdict-badge good">GOOD CANDIDATE</span>
+          </div>
+          <a href="{{ url_for('case_studies') }}#tio2" class="btn sdl-btn-outline mt-3 btn-sm">
+            Full Analysis <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="sdl-card sdl-case-card h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="sdl-material-badge badge-ito">ITO</span>
+            <h5 class="mb-0">ITO on Borosilicate Glass</h5>
+          </div>
+          <p class="text-muted mb-3">
+            In<sub>2</sub>O<sub>3</sub> bixbyite (001) + 10% SnO<sub>2</sub> — 11 atoms —
+            the standard transparent conductive oxide.
+          </p>
+          <ul class="sdl-case-bullets">
+            <li>Best pair: O_NBO1 &harr; In5c1 at <strong>&minus;3.44 eV</strong></li>
+            <li>132 pairs evaluated, ITO 55% stronger than TiO<sub>2</sub></li>
+            <li>Film dipole |&mu;| = 2.934 e&middot;&Aring;</li>
+          </ul>
+          <div class="mt-3">
+            <span class="sdl-verdict-badge excellent">EXCELLENT CANDIDATE</span>
+          </div>
+          <a href="{{ url_for('case_studies') }}#ito" class="btn sdl-btn-outline mt-3 btn-sm">
+            Full Analysis <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     BOTTOM CTA
+========================================================= -->
+<section class="sdl-cta-section">
+  <div class="container text-center">
+    <h2 class="sdl-cta-title">Ready to screen your material?</h2>
+    <p class="sdl-cta-sub">
+      Define your film atoms and get a ranked interaction table in seconds.
+      No setup required — works directly in the browser.
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+      <a href="{{ url_for('tool') }}" class="btn sdl-btn-primary btn-lg">
+        Launch Interactive Tool <i class="bi bi-lightning-charge ms-1"></i>
+      </a>
+      <a href="{{ url_for('case_studies') }}" class="btn sdl-btn-outline-light btn-lg">
+        View Case Studies
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

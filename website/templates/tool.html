@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Interactive Tool — Surface Dipole Library{% endblock %}
+
+{% block content %}
+
+<section class="sdl-page-hero sdl-tool-hero">
+  <div class="container">
+    <h1>Interactive Analysis Tool</h1>
+    <p class="sdl-page-hero-sub">
+      Define your film atoms, select a glass variant, and get a full ranked
+      interaction table in seconds. No installation required.
+    </p>
+  </div>
+</section>
+
+<div class="container-fluid sdl-tool-layout">
+  <div class="row g-0">
+
+    <!-- ============================================= LEFT: INPUT PANEL -->
+    <div class="col-lg-4 col-xl-3 sdl-input-panel">
+      <div class="sdl-input-inner">
+
+        <h5 class="sdl-panel-title">
+          <i class="bi bi-sliders me-2"></i>Analysis Parameters
+        </h5>
+
+        <!-- Glass variant -->
+        <div class="mb-3">
+          <label class="form-label sdl-input-label" for="glassVariant">
+            Glass Substrate
+          </label>
+          <select class="form-select sdl-form-control" id="glassVariant">
+            <option value="borosilicate" selected>Borosilicate (default)</option>
+            <option value="fused_silica">Fused Silica (pure SiO₂)</option>
+            <option value="aluminosilicate">Aluminosilicate</option>
+            <option value="soda_lime">Soda-Lime</option>
+          </select>
+        </div>
+
+        <!-- Cutoff -->
+        <div class="mb-4">
+          <label class="form-label sdl-input-label" for="cutoff">
+            Distance Cutoff (&Aring;)
+            <span class="sdl-tooltip-icon" data-bs-toggle="tooltip"
+                  title="Maximum atom–atom distance to include in analysis. 8.0 Å includes all relevant pairs.">
+              <i class="bi bi-info-circle"></i>
+            </span>
+          </label>
+          <input type="number" class="form-control sdl-form-control"
+                 id="cutoff" value="8.0" min="1.0" max="30.0" step="0.5" />
+        </div>
+
+        <!-- Presets -->
+        <div class="mb-4">
+          <label class="form-label sdl-input-label">Load Example</label>
+          <div class="d-flex gap-2">
+            <button class="btn sdl-btn-preset flex-fill" onclick="loadExample('tio2')">
+              <i class="bi bi-download me-1"></i>TiO<sub>2</sub>
+            </button>
+            <button class="btn sdl-btn-preset flex-fill" onclick="loadExample('ito')">
+              <i class="bi bi-download me-1"></i>ITO
+            </button>
+          </div>
+        </div>
+
+        <hr class="sdl-panel-divider" />
+
+        <!-- Atom table header -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="sdl-panel-title mb-0">
+            <i class="bi bi-table me-2"></i>Film Atoms
+            <span class="sdl-atom-count" id="atomCount">0</span>
+          </h6>
+          <button class="btn btn-sm sdl-btn-add" onclick="addAtom()">
+            <i class="bi bi-plus-lg me-1"></i>Add
+          </button>
+        </div>
+
+        <!-- Atom table container -->
+        <div class="sdl-atom-table-wrap">
+          <div id="atomTableContainer">
+            <div id="atomEmptyState" class="sdl-empty-state">
+              <i class="bi bi-atom"></i>
+              <p>No atoms yet.<br>Add atoms or load an example.</p>
+            </div>
+            <table class="table sdl-atom-table d-none" id="atomTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>El</th>
+                  <th>q (e)</th>
+                  <th>x</th>
+                  <th>y</th>
+                  <th>z</th>
+                  <th>Label</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="atomTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="sdl-submit-area mt-3">
+          <button class="btn sdl-btn-primary w-100 btn-lg" id="analyzeBtn"
+                  onclick="submitAnalysis()">
+            <span id="analyzeNormal">
+              Analyze <i class="bi bi-arrow-right ms-1"></i>
+            </span>
+            <span id="analyzeSpinner" class="d-none">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Running analysis...
+            </span>
+          </button>
+        </div>
+
+        <!-- Error alert -->
+        <div id="errorAlert" class="alert alert-danger mt-3 d-none" role="alert">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          <span id="errorMsg"></span>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ============================================= RIGHT: RESULTS PANEL -->
+    <div class="col-lg-8 col-xl-9 sdl-results-panel">
+      <div class="sdl-results-inner">
+
+        <!-- Placeholder / welcome state -->
+        <div id="resultsPlaceholder" class="sdl-results-placeholder">
+          <div class="sdl-placeholder-inner">
+            <i class="bi bi-graph-up-arrow sdl-placeholder-icon"></i>
+            <h4>Results will appear here</h4>
+            <p class="text-muted">
+              Load an example or define film atoms, then click
+              <strong>Analyze</strong> to see the ranked interaction table.
+            </p>
+            <button class="btn sdl-btn-primary" onclick="loadExample('tio2')">
+              Load TiO<sub>2</sub> Example
+            </button>
+          </div>
+        </div>
+
+        <!-- Actual results (hidden until analysis) -->
+        <div id="resultsContent" class="d-none">
+
+          <!-- Dipole cards row -->
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <div class="sdl-dipole-card" id="glassDipoleCard">
+                <div class="sdl-dipole-card-title">
+                  <i class="bi bi-hexagon me-2"></i>Glass Substrate Dipole
+                </div>
+                <div id="glassDipoleContent"></div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="sdl-dipole-card sdl-dipole-card-film" id="filmDipoleCard">
+                <div class="sdl-dipole-card-title">
+                  <i class="bi bi-layers me-2"></i>Film Dipole
+                </div>
+                <div id="filmDipoleContent"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Best interaction card -->
+          <div class="sdl-best-card mb-4" id="bestInteractionCard">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <i class="bi bi-star-fill sdl-best-star"></i>
+              <strong class="sdl-best-title">Best Interaction — Rank 1</strong>
+            </div>
+            <div id="bestInteractionContent"></div>
+          </div>
+
+          <!-- Stats row -->
+          <div class="row g-3 mb-3">
+            <div class="col-sm-4">
+              <div class="sdl-stat-mini sdl-stat-mini-total">
+                <div class="sdl-stat-mini-num" id="statTotal">0</div>
+                <div class="sdl-stat-mini-label">Total Pairs</div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="sdl-stat-mini sdl-stat-mini-attract">
+                <div class="sdl-stat-mini-num" id="statAttractive">0</div>
+                <div class="sdl-stat-mini-label">Attractive</div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="sdl-stat-mini sdl-stat-mini-repulse">
+                <div class="sdl-stat-mini-num" id="statRepulsive">0</div>
+                <div class="sdl-stat-mini-label">Repulsive</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full results table -->
+          <div class="sdl-table-header">
+            <h6 class="mb-0">
+              <i class="bi bi-table me-2"></i>Ranked Interaction Table
+              <span class="text-muted small ms-2" id="tableSubtitle"></span>
+            </h6>
+            <span class="text-muted small">Click column headers to sort</span>
+          </div>
+          <div class="table-responsive sdl-full-table-wrap">
+            <table class="table sdl-results-table sdl-results-table-full" id="resultsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" onclick="sortTable(0)" data-col="0">
+                    Rank <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th class="sortable" onclick="sortTable(1)" data-col="1">
+                    Glass Atom <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th class="sortable" onclick="sortTable(2)" data-col="2">
+                    Film Atom <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th class="sortable" onclick="sortTable(3)" data-col="3">
+                    Glass q <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th class="sortable" onclick="sortTable(4)" data-col="4">
+                    Film q <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th class="sortable" onclick="sortTable(5)" data-col="5">
+                    Dist (&Aring;) <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th class="sortable" onclick="sortTable(6)" data-col="6">
+                    Energy (eV) <i class="bi bi-chevron-expand"></i>
+                  </th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody"></tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tool.js') }}"></script>
+<script>
+  // Initialise Bootstrap tooltips
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+      new bootstrap.Tooltip(el);
+    });
+  });
+</script>
+{% endblock %}

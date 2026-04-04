@@ -1,0 +1,691 @@
+{% extends "base.html" %}
+{% block title %}Documentation — Surface Dipole Library{% endblock %}
+
+{% block content %}
+<div class="container-fluid sdl-docs-layout">
+  <div class="row">
+
+    <!-- ================================================= SIDEBAR -->
+    <nav class="col-lg-3 col-xl-2 d-none d-lg-block sdl-docs-sidebar">
+      <div class="sdl-docs-nav-wrap sticky-top">
+        <p class="sdl-docs-nav-heading">Contents</p>
+        <ul class="sdl-docs-nav">
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#science">Scientific Background</a></li>
+          <li><a href="#glass">Glass Substrate</a></li>
+          <li><a href="#input">Input Format</a></li>
+          <li><a href="#api">API Reference</a></li>
+          <li><a href="#output">Output</a></li>
+          <li><a href="#variants">Glass Variants</a></li>
+          <li><a href="#charges">Getting Partial Charges</a></li>
+          <li><a href="#refs">References</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- ================================================= MAIN CONTENT -->
+    <main class="col-lg-9 col-xl-10 sdl-docs-main">
+
+      <h1 class="sdl-docs-page-title">Documentation</h1>
+      <p class="sdl-docs-page-sub">
+        surface_dipole_library v1.0.0 &mdash; complete API and scientific reference.
+      </p>
+      <hr class="sdl-docs-hr" />
+
+      <!-- ─── OVERVIEW ─────────────────────────────────────────── -->
+      <section id="overview" class="sdl-docs-section">
+        <h2>Overview</h2>
+        <p>
+          <strong>surface_dipole_library</strong> is a production-ready Python library for
+          computing dipole moments and dipole–dipole interaction strengths between surface
+          atoms of a glass substrate and a thin film.
+        </p>
+        <p>
+          Its primary use-case is <strong>pre-screening glass–thin-film interfaces</strong>
+          before expensive DFT simulations.  The library takes partial charges and atomic
+          positions as input and returns a ranked table of all pairwise interactions,
+          identifying which substrate–film atom pairs produce the strongest attraction
+          (most negative energy) and which are repulsive.
+        </p>
+        <div class="sdl-info-box">
+          <strong>Design principle:</strong> The glass substrate is <em>fixed</em> &mdash;
+          the user only supplies the film atoms.  The canonical 12-atom borosilicate glass
+          surface with ClayFF partial charges is loaded automatically.
+        </div>
+
+        <h5 class="mt-4">Module map</h5>
+        <div class="sdl-code-block"><pre><code>surface_dipole_library/
+├── __init__.py      — flat public API exports
+├── atoms.py         — Atom dataclass and labelling helpers
+├── dipole.py        — calculate_dipole(), atomic_local_dipole()
+├── geometry.py      — distance(), displacement_vector(), pairwise_distances()
+├── interaction.py   — dipole_dipole_energy(), atom_pair_interaction()
+├── ranking.py       — generate_all_pairs(), rank_interactions(), print_summary()
+├── io.py            — XYZ / CIF / POSCAR / ASE / pymatgen readers &amp; writer
+└── main.py          — analyze_surface_interactions() high-level entry point</code></pre></div>
+      </section>
+
+      <!-- ─── SCIENTIFIC BACKGROUND ─────────────────────────────── -->
+      <section id="science" class="sdl-docs-section">
+        <h2>Scientific Background</h2>
+        <p>
+          When a thin film is deposited on a glass substrate, the initial adhesion is governed
+          by electrostatic interactions between surface dipoles.  Atoms with high partial
+          charges near the interface create local dipole moments that interact according to
+          classical dipole–dipole physics.
+        </p>
+
+        <h5>Dipole Moment</h5>
+        <p>
+          The electric dipole moment of a collection of point charges is computed as:
+        </p>
+        <div class="sdl-math-block">
+          \[
+            \boldsymbol{\mu} = \sum_i q_i \, \mathbf{r}_i
+            \quad \text{(units: } e \cdot \text{\AA)}
+          \]
+        </div>
+        <p>
+          where \(q_i\) is the partial charge in units of elementary charge \(e\) and
+          \(\mathbf{r}_i\) is the Cartesian position in Angstroms.
+          The conversion factor is <strong>1 e&middot;&Aring; &asymp; 4.803 Debye</strong>.
+        </p>
+
+        <h5>Effective Local Atomic Dipole</h5>
+        <p>
+          Rather than using the global dipole vector directly, each atom's
+          <em>local contribution</em> is computed relative to the group's geometric centroid
+          \(\mathbf{r}_c\):
+        </p>
+        <div class="sdl-math-block">
+          \[
+            \boldsymbol{\mu}_i^{\text{local}} = q_i \, (\mathbf{r}_i - \mathbf{r}_c)
+          \]
+        </div>
+        <p>
+          This makes all interaction energies independent of the global coordinate origin —
+          translating both surfaces by any vector does not change any computed energy.
+        </p>
+
+        <h5>Dipole–Dipole Interaction Energy</h5>
+        <p>
+          The interaction energy between two point dipoles separated by displacement vector
+          \(\mathbf{r}\) is:
+        </p>
+        <div class="sdl-math-block">
+          \[
+            U = \frac{1}{4\pi\varepsilon_0} \left[
+              \frac{\boldsymbol{\mu}_1 \cdot \boldsymbol{\mu}_2}{r^3}
+              - \frac{3\,(\boldsymbol{\mu}_1 \cdot \hat{\mathbf{r}})\,
+                        (\boldsymbol{\mu}_2 \cdot \hat{\mathbf{r}})}{r^3}
+            \right]
+          \]
+        </div>
+        <p>
+          In practical surface-science units (&mu; in e&middot;&Aring;, r in &Aring;, U in eV):
+        </p>
+        <div class="sdl-math-block">
+          \[
+            U = K_e \left[
+              \frac{\boldsymbol{\mu}_1 \cdot \boldsymbol{\mu}_2}{r^3}
+              - \frac{3\,(\boldsymbol{\mu}_1 \cdot \mathbf{r})\,(\boldsymbol{\mu}_2 \cdot \mathbf{r})}{r^5}
+            \right]
+          \]
+        </div>
+        <p>
+          where the Coulomb constant \(K_e = 14.3996 \text{ eV·Å/}e^2\) is derived from:
+        </p>
+        <div class="sdl-code-block"><pre><code>k_e = 8.9876e9 N·m²/C²
+e   = 1.6022e-19 C
+1 Å = 1e-10 m
+1 eV = 1.6022e-19 J
+K_e = k_e × e² / Å = 14.3996 eV</code></pre></div>
+
+        <h5>Sign Convention</h5>
+        <div class="row g-3 mt-1">
+          <div class="col-md-4">
+            <div class="sdl-sign-card sdl-sign-attractive">
+              <div class="sdl-sign-label">U &lt; 0</div>
+              <div class="sdl-sign-desc">Attractive — energetically favourable</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="sdl-sign-card sdl-sign-neutral">
+              <div class="sdl-sign-label">U &approx; 0</div>
+              <div class="sdl-sign-desc">Neutral — negligible interaction</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="sdl-sign-card sdl-sign-repulsive">
+              <div class="sdl-sign-label">U &gt; 0</div>
+              <div class="sdl-sign-desc">Repulsive — energetically unfavourable</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── GLASS SUBSTRATE ───────────────────────────────────── -->
+      <section id="glass" class="sdl-docs-section">
+        <h2>Glass Substrate</h2>
+        <p>
+          The substrate is <strong>fixed</strong> as a canonical 12-atom borosilicate glass
+          surface derived from the &beta;-cristobalite SiO<sub>2</sub> (001) surface unit
+          cell (lattice parameter a = 7.16 &Aring;).  Partial charges are from the ClayFF
+          force field (Cygan et al. 2004), cross-validated against CHARMM-silica (Lopes
+          et al. 2006) and INTERFACE FF (Heinz et al. 2013).
+        </p>
+
+        <h5>Atom Inventory — 12 atoms, 3 layers + silanol</h5>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Element</th>
+                <th>Charge (e)</th>
+                <th>x (&Aring;)</th>
+                <th>y (&Aring;)</th>
+                <th>z (&Aring;)</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Si1_sub</code></td><td>Si</td>
+                <td class="text-pos">+0.310</td>
+                <td>0.00</td><td>0.00</td><td>0.00</td>
+                <td>Tetrahedral Si centre (Q4)</td>
+              </tr>
+              <tr>
+                <td><code>Si2_sub</code></td><td>Si</td>
+                <td class="text-pos">+0.310</td>
+                <td>5.06</td><td>0.00</td><td>0.00</td>
+                <td>Tetrahedral Si centre (Q4)</td>
+              </tr>
+              <tr>
+                <td><code>Si3_sub</code></td><td>Si</td>
+                <td class="text-pos">+0.310</td>
+                <td>2.53</td><td>4.38</td><td>0.00</td>
+                <td>Tetrahedral Si centre (Q4)</td>
+              </tr>
+              <tr>
+                <td><code>O_BO1_sub</code></td><td>O</td>
+                <td class="text-neg">-0.155</td>
+                <td>1.60</td><td>0.00</td><td>0.80</td>
+                <td>Bridging oxygen — connects two Si tetrahedra</td>
+              </tr>
+              <tr>
+                <td><code>O_BO2_sub</code></td><td>O</td>
+                <td class="text-neg">-0.155</td>
+                <td>3.80</td><td>0.00</td><td>0.80</td>
+                <td>Bridging oxygen</td>
+              </tr>
+              <tr>
+                <td><code>O_BO3_sub</code></td><td>O</td>
+                <td class="text-neg">-0.155</td>
+                <td>1.27</td><td>2.19</td><td>0.80</td>
+                <td>Bridging oxygen</td>
+              </tr>
+              <tr>
+                <td><code>O_BO4_sub</code></td><td>O</td>
+                <td class="text-neg">-0.155</td>
+                <td>3.79</td><td>2.19</td><td>0.80</td>
+                <td>Bridging oxygen</td>
+              </tr>
+              <tr class="sdl-nbo-row">
+                <td><code>O_NBO1_sub</code></td><td>O</td>
+                <td class="text-neg"><strong>-0.290</strong></td>
+                <td>0.00</td><td>0.00</td><td>1.60</td>
+                <td><strong>Non-bridging O — primary docking site</strong></td>
+              </tr>
+              <tr class="sdl-nbo-row">
+                <td><code>O_NBO2_sub</code></td><td>O</td>
+                <td class="text-neg"><strong>-0.290</strong></td>
+                <td>5.06</td><td>0.00</td><td>1.60</td>
+                <td><strong>Non-bridging O — primary docking site</strong></td>
+              </tr>
+              <tr class="sdl-nbo-row">
+                <td><code>O_NBO3_sub</code></td><td>O</td>
+                <td class="text-neg"><strong>-0.290</strong></td>
+                <td>2.53</td><td>4.38</td><td>1.60</td>
+                <td><strong>Non-bridging O — primary docking site</strong></td>
+              </tr>
+              <tr>
+                <td><code>B1_sub</code></td><td>B</td>
+                <td class="text-pos">+0.270</td>
+                <td>2.53</td><td>1.46</td><td>0.00</td>
+                <td>Boron — B<sub>2</sub>O<sub>3</sub> network former</td>
+              </tr>
+              <tr>
+                <td><code>H_OH1_sub</code></td><td>H</td>
+                <td class="text-pos">+0.175</td>
+                <td>0.96</td><td>0.00</td><td>2.35</td>
+                <td>Silanol H — Si&ndash;OH surface hydroxyl</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="sdl-info-box mt-3">
+          <strong>Net charge:</strong> &Sigma;q<sub>i</sub> = &minus;0.115 e (slightly anionic).
+          The dominant surface feature is the three <strong>Non-Bridging Oxygens (NBO)</strong>
+          at z = 1.60 &Aring; with charge &minus;0.290 e each — the most electronegative sites
+          and primary docking points for cationic film atoms.
+        </div>
+      </section>
+
+      <!-- ─── INPUT FORMAT ─────────────────────────────────────── -->
+      <section id="input" class="sdl-docs-section">
+        <h2>Input Format</h2>
+        <p>
+          Film atoms are provided as a Python <code>list</code> of <code>dict</code> objects.
+          Each dict has three required keys:
+        </p>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr>
+                <th>Key</th><th>Type</th><th>Units</th><th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>element</code></td>
+                <td><code>str</code></td>
+                <td>&mdash;</td>
+                <td>Chemical symbol, e.g. <code>"Ti"</code>, <code>"O"</code>, <code>"In"</code></td>
+              </tr>
+              <tr>
+                <td><code>charge</code></td>
+                <td><code>float</code></td>
+                <td>elementary e</td>
+                <td>Partial charge — positive for cations, negative for anions</td>
+              </tr>
+              <tr>
+                <td><code>position</code></td>
+                <td><code>list[3]</code></td>
+                <td>&Aring;</td>
+                <td>Cartesian coordinates <code>[x, y, z]</code></td>
+              </tr>
+              <tr>
+                <td><code>label</code></td>
+                <td><code>str</code></td>
+                <td>&mdash;</td>
+                <td><em>Optional.</em> Custom atom label. Auto-generated if omitted (e.g. <code>film_Ti1</code>)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="sdl-info-box mt-3">
+          <strong>Coordinate convention:</strong> All atoms must be in the same Cartesian
+          frame. The glass substrate occupies z &asymp; 0–2.35 &Aring;. Film atoms should
+          start at z &gt; 1.6 &Aring;, typically z &asymp; 3.5 &Aring;.
+        </div>
+
+        <h5 class="mt-4">Example</h5>
+        <div class="sdl-code-block"><pre><code>film_atoms = [
+    {"element": "Ti", "charge":  0.580, "position": [0.00, 0.00, 3.50], "label": "Ti5c1_film"},
+    {"element": "Ti", "charge":  0.580, "position": [2.96, 0.00, 3.50], "label": "Ti5c2_film"},
+    {"element": "O",  "charge": -0.290, "position": [1.48, 0.00, 4.20], "label": "O_br1_film"},
+    {"element": "O",  "charge": -0.260, "position": [0.00, 1.62, 3.80], "label": "O_ip1_film"},
+]</code></pre></div>
+      </section>
+
+      <!-- ─── API REFERENCE ─────────────────────────────────────── -->
+      <section id="api" class="sdl-docs-section">
+        <h2>API Reference</h2>
+
+        <div class="sdl-api-block">
+          <div class="sdl-api-sig">
+            <code>analyze_film_on_glass(film_atoms, cutoff=None, glass_variant="borosilicate", verbose=True)</code>
+          </div>
+          <p class="mt-2">
+            Run the full dipole–dipole interaction analysis with the substrate fixed as
+            borosilicate glass. The user only supplies the thin film.
+          </p>
+          <h6>Parameters</h6>
+          <div class="table-responsive">
+            <table class="table sdl-data-table">
+              <thead>
+                <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>film_atoms</code></td>
+                  <td><code>list[dict]</code></td>
+                  <td><em>required</em></td>
+                  <td>Film surface atoms. Each dict: element, charge, position, label (optional).</td>
+                </tr>
+                <tr>
+                  <td><code>cutoff</code></td>
+                  <td><code>float or None</code></td>
+                  <td><code>None</code></td>
+                  <td>Maximum atom–atom distance (&Aring;) to include. <code>None</code> = all pairs.</td>
+                </tr>
+                <tr>
+                  <td><code>glass_variant</code></td>
+                  <td><code>str</code></td>
+                  <td><code>"borosilicate"</code></td>
+                  <td>Glass composition to use. See <a href="#variants">Glass Variants</a>.</td>
+                </tr>
+                <tr>
+                  <td><code>verbose</code></td>
+                  <td><code>bool</code></td>
+                  <td><code>True</code></td>
+                  <td>Print formatted summary table to stdout.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h6 class="mt-3">Returns</h6>
+          <p><code>dict</code> — see <a href="#output">Output</a> section for full key list.</p>
+        </div>
+
+        <div class="sdl-api-block mt-4">
+          <div class="sdl-api-sig">
+            <code>analyze_surface_interactions(substrate_atoms, film_atoms, cutoff=None, verbose=True)</code>
+          </div>
+          <p class="mt-2">
+            General-purpose entry point where the user provides both substrate and film.
+          </p>
+        </div>
+
+        <div class="sdl-api-block mt-4">
+          <div class="sdl-api-sig">
+            <code>analyze_from_xyz(substrate_file, film_file, cutoff=None, has_charges=True, verbose=True)</code>
+          </div>
+          <p class="mt-2">
+            Load both surfaces from 5-column XYZ files (element x y z charge) and run analysis.
+          </p>
+        </div>
+
+        <div class="sdl-api-block mt-4">
+          <div class="sdl-api-sig">
+            <code>analyze_from_ase(substrate_file, film_file, substrate_charges=None, film_charges=None, cutoff=None, verbose=True)</code>
+          </div>
+          <p class="mt-2">
+            Load both surfaces via ASE (supports .cif, POSCAR, .xyz, .vasp, etc.)
+            and run analysis.
+          </p>
+        </div>
+
+        <h5 class="mt-4">Quick start example</h5>
+        <div class="sdl-code-block"><pre><code>from surface_dipole_library import analyze_film_on_glass
+
+tio2_film = [
+    {"element": "Ti", "charge":  0.580, "position": [0.00, 0.00, 3.50]},
+    {"element": "Ti", "charge":  0.580, "position": [2.96, 0.00, 3.50]},
+    {"element": "O",  "charge": -0.290, "position": [1.48, 0.00, 4.20]},
+    {"element": "O",  "charge": -0.260, "position": [0.00, 1.62, 3.80]},
+]
+
+result = analyze_film_on_glass(tio2_film, cutoff=8.0)
+print(result["interaction_table"])
+print(result["best_interaction"])</code></pre></div>
+      </section>
+
+      <!-- ─── OUTPUT ────────────────────────────────────────────── -->
+      <section id="output" class="sdl-docs-section">
+        <h2>Output</h2>
+        <p>
+          <code>analyze_film_on_glass()</code> returns a <code>dict</code> with the following keys:
+        </p>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr><th>Key</th><th>Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>substrate_atoms</code></td><td><code>list[Atom]</code></td><td>Labelled glass surface atoms</td></tr>
+              <tr><td><code>film_atoms</code></td><td><code>list[Atom]</code></td><td>Labelled film atoms</td></tr>
+              <tr><td><code>substrate_dipole</code></td><td><code>dict</code></td><td>Dipole vector, |&mu;|, Debye value, net charge, n_atoms</td></tr>
+              <tr><td><code>film_dipole</code></td><td><code>dict</code></td><td>Same structure as substrate_dipole</td></tr>
+              <tr><td><code>interaction_table</code></td><td><code>pd.DataFrame</code></td><td>Ranked interaction table (see columns below)</td></tr>
+              <tr><td><code>best_interaction</code></td><td><code>dict</code></td><td>Summary of the rank-1 pair</td></tr>
+              <tr><td><code>n_pairs</code></td><td><code>int</code></td><td>Total atom pairs evaluated</td></tr>
+              <tr><td><code>glass_variant</code></td><td><code>str</code></td><td>Glass composition used as substrate</td></tr>
+              <tr><td><code>glass_atoms</code></td><td><code>list[Atom]</code></td><td>The fixed glass atoms that were used</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h5 class="mt-4">interaction_table columns</h5>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr><th>Column</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Rank</code></td><td>1 = strongest attractive interaction</td></tr>
+              <tr><td><code>Substrate Atom</code></td><td>Label of the glass surface atom</td></tr>
+              <tr><td><code>Film Atom</code></td><td>Label of the film atom</td></tr>
+              <tr><td><code>Substrate Element</code></td><td>Element symbol of glass atom</td></tr>
+              <tr><td><code>Film Element</code></td><td>Element symbol of film atom</td></tr>
+              <tr><td><code>Substrate Charge (e)</code></td><td>Partial charge of glass atom</td></tr>
+              <tr><td><code>Film Charge (e)</code></td><td>Partial charge of film atom</td></tr>
+              <tr><td><code>Distance (&Aring;)</code></td><td>Atom–atom separation in Angstroms</td></tr>
+              <tr><td><code>mu1 Magnitude (e·&Aring;)</code></td><td>|&mu;<sub>local</sub>| of glass atom</td></tr>
+              <tr><td><code>mu2 Magnitude (e·&Aring;)</code></td><td>|&mu;<sub>local</sub>| of film atom</td></tr>
+              <tr><td><code>Interaction Energy (eV)</code></td><td><strong>Negative = attractive, positive = repulsive</strong></td></tr>
+              <tr><td><code>Interaction Type</code></td><td><code>"attractive"</code>, <code>"repulsive"</code>, or <code>"neutral"</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── GLASS VARIANTS ───────────────────────────────────── -->
+      <section id="variants" class="sdl-docs-section">
+        <h2>Glass Variants</h2>
+        <p>
+          Four glass compositions are available. Pass the variant name as the
+          <code>glass_variant</code> parameter:
+        </p>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr>
+                <th>Variant key</th>
+                <th>Composition</th>
+                <th>Atoms</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>"borosilicate"</code></td>
+                <td>SiO<sub>2</sub> + B<sub>2</sub>O<sub>3</sub> + silanol</td>
+                <td>12</td>
+                <td><strong>Default.</strong> Models display/solar/optical glass (Schott, Corning)</td>
+              </tr>
+              <tr>
+                <td><code>"fused_silica"</code></td>
+                <td>Pure SiO<sub>2</sub></td>
+                <td>10</td>
+                <td>No boron, no silanol. Optical / UV-grade fused silica</td>
+              </tr>
+              <tr>
+                <td><code>"aluminosilicate"</code></td>
+                <td>SiO<sub>2</sub> + Al<sub>2</sub>O<sub>3</sub></td>
+                <td>12</td>
+                <td>Al substitutes one Si. Models alkali aluminosilicate glass</td>
+              </tr>
+              <tr>
+                <td><code>"soda_lime"</code></td>
+                <td>SiO<sub>2</sub> + Na network modifier</td>
+                <td>12</td>
+                <td>Na<sup>+</sup> as network modifier. Models common float glass</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h5 class="mt-3">Usage</h5>
+        <div class="sdl-code-block"><pre><code>result = analyze_film_on_glass(film_atoms, glass_variant="fused_silica")
+result = analyze_film_on_glass(film_atoms, glass_variant="aluminosilicate")
+result = analyze_film_on_glass(film_atoms, glass_variant="soda_lime")</code></pre></div>
+      </section>
+
+      <!-- ─── GETTING PARTIAL CHARGES ──────────────────────────── -->
+      <section id="charges" class="sdl-docs-section">
+        <h2>Getting Partial Charges</h2>
+        <p>
+          The most important input parameter is the partial charge. Here are the
+          recommended sources for common thin film materials:
+        </p>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr>
+                <th>Source</th><th>Method</th><th>Suitable for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ClayFF</strong> (Cygan et al. 2004)</td>
+                <td>Force field — tabulated values</td>
+                <td>Glass substrate (built-in), silicates, aluminosilicates</td>
+              </tr>
+              <tr>
+                <td><strong>Matsui–Akaogi</strong> (1991)</td>
+                <td>Empirical pair potential</td>
+                <td>TiO<sub>2</sub>, Al<sub>2</sub>O<sub>3</sub>, MgO, SiO<sub>2</sub></td>
+              </tr>
+              <tr>
+                <td><strong>Bader charge analysis</strong></td>
+                <td>DFT + VASP/WIEN2k + Bader code</td>
+                <td>Any material — DFT-quality, most accurate</td>
+              </tr>
+              <tr>
+                <td><strong>BVAnalyzer</strong> (pymatgen)</td>
+                <td>Bond valence sum method</td>
+                <td>Oxides — quick estimate from crystal structure</td>
+              </tr>
+              <tr>
+                <td><strong>Lewis-Catlow potentials</strong></td>
+                <td>Empirical shell model</td>
+                <td>ITO (In<sub>2</sub>O<sub>3</sub>, SnO<sub>2</sub>)</td>
+              </tr>
+              <tr>
+                <td><strong>ReaxFF</strong></td>
+                <td>Reactive force field (DFT-fitted)</td>
+                <td>TiO<sub>2</sub>, ZnO, Si<sub>3</sub>N<sub>4</sub></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h5 class="mt-3">Typical charge ranges</h5>
+        <div class="table-responsive">
+          <table class="table sdl-data-table">
+            <thead>
+              <tr>
+                <th>Material</th><th>Element</th><th>Typical charge (e)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>SiO<sub>2</sub> glass</td><td>Si</td><td>+0.28 to +0.35</td></tr>
+              <tr><td>SiO<sub>2</sub> glass</td><td>O (bridging)</td><td>&minus;0.14 to &minus;0.17</td></tr>
+              <tr><td>SiO<sub>2</sub> glass</td><td>O (non-bridging)</td><td>&minus;0.25 to &minus;0.35</td></tr>
+              <tr><td>TiO<sub>2</sub> (rutile)</td><td>Ti</td><td>+0.44 to +0.60</td></tr>
+              <tr><td>TiO<sub>2</sub> (rutile)</td><td>O</td><td>&minus;0.22 to &minus;0.30</td></tr>
+              <tr><td>Al<sub>2</sub>O<sub>3</sub> (corundum)</td><td>Al</td><td>+0.40 to +0.50</td></tr>
+              <tr><td>ZnO (wurtzite)</td><td>Zn</td><td>+0.35 to +0.45</td></tr>
+              <tr><td>ITO (bixbyite)</td><td>In</td><td>+0.75 to +0.80</td></tr>
+              <tr><td>ITO (bixbyite)</td><td>Sn (dopant)</td><td>+0.90 to +1.00</td></tr>
+              <tr><td>ITO (bixbyite)</td><td>O (bridging)</td><td>&minus;0.37 to &minus;0.41</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── REFERENCES ───────────────────────────────────────── -->
+      <section id="refs" class="sdl-docs-section">
+        <h2>References</h2>
+        <ol class="sdl-refs-list">
+          <li>
+            Cygan, R. T., Liang, J.-J., &amp; Kalinichev, A. G. (2004).
+            Molecular models of hydroxide, oxyhydroxide, and clay phases and
+            the development of a general force field.
+            <em>J. Phys. Chem. B</em>, <strong>108</strong>(4), 1255–1266.
+            <br><em>ClayFF force field — glass partial charges.</em>
+          </li>
+          <li>
+            Matsui, M., &amp; Akaogi, M. (1991).
+            Molecular dynamics simulation of the structural and physical properties
+            of the four polymorphs of TiO<sub>2</sub>.
+            <em>Mol. Simul.</em>, <strong>6</strong>(4), 239–244.
+            <br><em>TiO<sub>2</sub> partial charges used in case study 1.</em>
+          </li>
+          <li>
+            Hamad, S., Moreira, N. H., &amp; Catlow, C. R. A. (2011).
+            Atomistic simulation study of In<sub>2</sub>O<sub>3</sub> surfaces.
+            <em>J. Phys. Chem. C</em>, <strong>114</strong>(14), 2527–2535.
+            <br><em>ITO partial charges used in case study 2.</em>
+          </li>
+          <li>
+            Lopes, P. E. M., Murashov, V., Tazi, M., Demchuk, E., &amp; MacKerell, A. D. (2006).
+            Development of an empirical force field for silica. Application to the quartz–
+            water interface.
+            <em>J. Phys. Chem. B</em>, <strong>110</strong>(6), 2782–2792.
+            <br><em>CHARMM-silica — cross-validation of glass charges.</em>
+          </li>
+          <li>
+            Heinz, H., Lin, T.-J., Mishra, R. K., &amp; Emami, F. S. (2013).
+            Thermodynamically consistent force fields for the assembly of inorganic,
+            organic, and biological nanostructures.
+            <em>Langmuir</em>, <strong>29</strong>(6), 1754–1765.
+            <br><em>INTERFACE FF — cross-validation of glass charges.</em>
+          </li>
+          <li>
+            Born, M., &amp; Huang, K. (1954).
+            <em>Dynamical Theory of Crystal Lattices</em>. Oxford University Press.
+            <br><em>Classical dipole–dipole interaction energy.</em>
+          </li>
+          <li>
+            Ong, S. P. et al. (2013).
+            Python Materials Genomics (pymatgen): A robust, open-source python library
+            for materials analysis.
+            <em>Comput. Mater. Sci.</em>, <strong>68</strong>, 314–319.
+            <br><em>BVAnalyzer for charge estimation.</em>
+          </li>
+          <li>
+            Larsen, A. H. et al. (2017).
+            The Atomic Simulation Environment — A Python library for working with atoms.
+            <em>J. Phys.: Condens. Matter</em>, <strong>29</strong>(27), 273002.
+            <br><em>ASE — structure file reading.</em>
+          </li>
+          <li>
+            Diebold, U. (2003).
+            The surface science of titanium dioxide.
+            <em>Surf. Sci. Rep.</em>, <strong>48</strong>(5–8), 53–229.
+            <br><em>TiO<sub>2</sub>(110) surface structure reference.</em>
+          </li>
+        </ol>
+      </section>
+
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('.sdl-docs-section');
+  const navLinks = document.querySelectorAll('.sdl-docs-nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const id = entry.target.getAttribute('id');
+        const link = document.querySelector(`.sdl-docs-nav a[href="#${id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+{% endblock %}

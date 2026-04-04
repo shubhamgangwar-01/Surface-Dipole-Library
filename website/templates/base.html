@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Surface Dipole Library{% endblock %}</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous" />
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+  <!-- MathJax for formula rendering -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<!-- ========================================================= NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark sdl-navbar sticky-top">
+  <div class="container">
+
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+      <span class="sdl-logo-badge">SDL</span>
+      <span class="sdl-brand-text">surface_dipole_library</span>
+    </a>
+
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navMain"
+            aria-controls="navMain" aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
+             href="{{ url_for('index') }}">
+            <i class="bi bi-house me-1"></i>Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'docs' %}active{% endif %}"
+             href="{{ url_for('docs') }}">
+            <i class="bi bi-book me-1"></i>Docs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'case_studies' %}active{% endif %}"
+             href="{{ url_for('case_studies') }}">
+            <i class="bi bi-graph-up me-1"></i>Case Studies
+          </a>
+        </li>
+        <li class="nav-item ms-lg-2">
+          <a class="nav-link sdl-nav-cta {% if request.endpoint == 'tool' %}active{% endif %}"
+             href="{{ url_for('tool') }}">
+            <i class="bi bi-lightning-charge me-1"></i>Try the Tool
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ========================================================= CONTENT -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ========================================================= FOOTER -->
+<footer class="sdl-footer">
+  <div class="container">
+    <div class="row align-items-center gy-2">
+      <div class="col-md-6">
+        <span class="sdl-logo-badge me-2">SDL</span>
+        <strong>surface_dipole_library v1.0.0</strong>
+        &nbsp;&middot;&nbsp;
+        <span class="text-muted">MIT License</span>
+      </div>
+      <div class="col-md-6 text-md-end text-muted small">
+        ClayFF charges: Cygan, Liang &amp; Kalinichev, <em>J. Phys. Chem. B</em> 108, 1255 (2004)
+        &nbsp;&middot;&nbsp;
+        <a href="{{ url_for('docs') }}" class="sdl-footer-link">Documentation</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
